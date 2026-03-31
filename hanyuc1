@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>2 Player Survival Game</title>
+</head>
+<body>
+<canvas id="game" width="600" height="400" style="border:1px solid black;"></canvas>
+
+<script>
+let canvas = document.getElementById("game");
+let ctx = canvas.getContext("2d");
+
+// Players
+let p1 = {x:100, y:300, w:30, h:30, color:"blue"};
+let p2 = {x:400, y:300, w:30, h:30, color:"red"};
+
+// Enemy
+let enemies = [];
+
+function spawnEnemy() {
+  enemies.push({
+    x: Math.random()*570,
+    y: 0,
+    w: 30,
+    h: 30,
+    speed: 3
+  });
+}
+setInterval(spawnEnemy, 1000);
+
+// Controls
+let keys = {};
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function movePlayers() {
+  // Player 1 (WASD)
+  if(keys["a"]) p1.x -= 5;
+  if(keys["d"]) p1.x += 5;
+  if(keys["w"]) p1.y -= 5;
+  if(keys["s"]) p1.y += 5;
+
+  // Player 2 (Arrow keys)
+  if(keys["ArrowLeft"]) p2.x -= 5;
+  if(keys["ArrowRight"]) p2.x += 5;
+  if(keys["ArrowUp"]) p2.y -= 5;
+  if(keys["ArrowDown"]) p2.y += 5;
+}
+
+// Collision
+function isColliding(a, b) {
+  return a.x < b.x + b.w &&
+         a.x + a.w > b.x &&
+         a.y < b.y + b.h &&
+         a.y + a.h > b.y;
+}
+
+let gameOver = false;
+
+function gameLoop() {
+  if(gameOver) {
+    ctx.fillText("GAME OVER", 250, 200);
+    return;
+  }
+
+  ctx.clearRect(0,0,600,400);
+
+  movePlayers();
+
+  // Draw players
+  ctx.fillStyle = p1.color;
+  ctx.fillRect(p1.x, p1.y, p1.w, p1.h);
+
+  ctx.fillStyle = p2.color;
+  ctx.fillRect(p2.x, p2.y, p2.w, p2.h);
+
+  // Enemies
+  for(let e of enemies) {
+    e.y += e.speed;
+    ctx.fillStyle = "black";
+    ctx.fillRect(e.x, e.y, e.w, e.h);
+
+    if(isColliding(p1, e) || isColliding(p2, e)) {
+      gameOver = true;
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
